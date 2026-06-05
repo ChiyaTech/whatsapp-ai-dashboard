@@ -12,33 +12,63 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await API.post("/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      router.push("/dashboard");
-    } catch {
-      setError("Invalid credentials");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setError("");
 
-  const handleRegister = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await API.post("/auth/register", { email, password });
-      const res = await API.post("/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      router.push("/onboarding");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Registration failed");
-    } finally {
-      setLoading(false);
+  try {
+    const res = await API.post("/auth/login", {
+      email,
+      password,
+    });
+
+    localStorage.setItem(
+      "token",
+      res.data.token
+    );
+
+    router.push("/dashboard");
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error;
+
+    if (msg === "ACCOUNT_NOT_ACTIVE") {
+      setError(
+        "Account not activated yet. Contact ChiyaTech support."
+      );
+    } else {
+      setError("Invalid credentials");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+  const handleRegister = async () => {
+  setLoading(true);
+  setError("");
+
+  try {
+    await API.post("/auth/register", {
+      email,
+      password,
+    });
+
+    alert(
+      "Account created successfully. Contact ChiyaTech to activate your account."
+    );
+
+    setMode("login");
+    setEmail("");
+    setPassword("");
+  } catch (err: any) {
+    setError(
+      err?.response?.data?.message ||
+        "Registration failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600";
 
